@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const reactionSchema = {
+const userSchema = {
   userName: {
     type: String,
     required: true,
@@ -13,7 +13,7 @@ const reactionSchema = {
     type: String,
     required: true,
     minLength: 2,
-    maxLength: 100,
+    maxLength: 50,
     trim: true,
     unique: true,
   },
@@ -31,8 +31,8 @@ const reactionSchema = {
   ],
 };
 
-const schema = new Schema(reactionSchema);
+const schema = new Schema(userSchema);
 
-const Reaction = mongoose.model("Reaction", schema);
+const User = mongoose.model("user", schema);
 
-module.exports = Reaction;
+module.exports = User;
