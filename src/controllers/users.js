@@ -1,6 +1,6 @@
-const connection = require("../../config/connection");
-const User = require("../../models/User");
-const server = require("../../index");
+const connection = require("../../src/config/connection");
+const User = require("../..//src/models/User");
+const server = require("../../src/index");
 const mongoose = require("mongoose");
 
 const getAllUsers = async (req, res) => {

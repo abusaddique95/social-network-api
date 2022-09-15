@@ -1,6 +1,29 @@
 require("dotenv").config();
-const mongoose = require("mongoose");
-const { seedUsers, seedThoughts } = require("./util");
+const { mongoose } = require("mongoose");
+const { Thought } = require("../../src/models/Thought");
+const { User } = require("../../src/models/User");
+const thought = require("./thoughtdata.json");
+const user = require("./userdata.json");
+
+const thoughtsSeed = async () => {
+  await Thought.deleteMany();
+  const promises = thought.map((thought) => Thought.create(thought));
+  await Promise.all(promises);
+  console.log("Successfully seeded thoughts");
+};
+
+const userSeed = async () => {
+  await User.deleteMany();
+  const thoughtsFromDB = await Thought.find();
+  const promises = user.map(async (user) => {
+    const chooseRandomIndex = Math.floor(Math.random() * thoughtsFromDB.length);
+    user.thoughts.push(thoughtsFromDB[chooseRandomIndex]._id);
+    return User.create(user);
+  });
+
+  await Promise.all(promises);
+  console.log("Successfully seeded users");
+};
 
 const init = async () => {
   try {
@@ -13,21 +36,19 @@ const init = async () => {
       useUnifiedTopology: true,
     };
 
-    mongoose.connect(MONGODB_URI, options);
-    console.log("[INFO]: Successfully connected to DB");
+    await mongoose.connect(MONGODB_URI, options);
 
-    // seed users
-    await seedUsers(50);
+    console.log("[INFO]: Successfully connected to Database");
 
-    // seed thoughts
-    await seedThoughts(30);
+    await thoughtsSeed();
+    await userSeed();
+
+    console.log("Successfully seeded");
   } catch (error) {
-    console.log(`[ERROR]: Failed to seed DB | ${error.message}`);
+    console.log(`[ERROR]: Could not seed | ${error.message}`);
   }
 
   process.exit(0);
 };
-
-// get one user
 
 init();

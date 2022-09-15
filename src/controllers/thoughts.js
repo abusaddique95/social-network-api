@@ -1,9 +1,6 @@
-const connection = require("../../config/connection");
-
-const Thought = require("../../models/Thought");
-
-const server = require("../../index");
-
+const connection = require("../../src/config/connection");
+const Thought = require("../../src/models/Thought");
+const server = require("../../src/index");
 const mongoose = require("mongoose");
 
 const getAllThoughts = async (req, res) => {

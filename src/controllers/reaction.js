@@ -1,8 +1,8 @@
-const connection = require("../../config/connection");
-const Reaction = require("../../models/Reaction");
-const server = require("../../index");
+const connection = require("../../src/config/connection");
+const Reaction = require("../../src/models/Reaction");
+const server = require("../../src/index");
 const mongoose = require("mongoose");
-const Thought = require("../../models/Thought");
+const Thought = require("../../src/models/Thought");
 
 const createReaction = async (req, res) => {
   try {
