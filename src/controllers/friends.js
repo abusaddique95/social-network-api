@@ -10,6 +10,6 @@ const deleteFriend = (req, res) => {
 };
 
 module.exports = {
-  createAFriend,
-  deleteAFriend,
+  createFriend,
+  deleteFriend,
 };
