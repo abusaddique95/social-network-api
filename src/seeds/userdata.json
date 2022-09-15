@@ -1,0 +1,22 @@
+[
+  {
+    "userName": "Ali khan",
+    "email": "alikhan@gmail.com",
+    "friends": []
+  },
+  {
+    "userName": "eisa saddique",
+    "email": "eisakhan@gmail.com",
+    "friends": []
+  },
+  {
+    "userName": "abu saddique",
+    "email": "abu@gmail.com",
+    "friends": []
+  },
+  {
+    "userName": "zainab muddsar",
+    "email": "zainab@gmail.com",
+    "friends": []
+  }
+]
