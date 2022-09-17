@@ -1,7 +1,5 @@
 require("dotenv").config();
 
-const databaseConnection = require("./config/connection.js");
-
 const express = require("express");
 const mongoose = require("mongoose");
 
@@ -13,17 +11,25 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(routes);
 
 const init = async () => {
   try {
-    await databaseConnection;
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
+    await mongoose.connect(
+      "mongodb://127.0.0.1:27017/NOSQL-social-network-api",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      }
+    );
+
+    console.log("[INFO]: Database connection successful");
+
+    app.listen(PORT, () =>
+      console.log(` Server running on http://localhost:${PORT}`)
+    );
   } catch (error) {
-    console.log(`ERROR FAILED TO RUN SERVER ${error.message}`);
+    console.log(`[ERROR]: Database connection failed | ${error.message}`);
   }
 };
 

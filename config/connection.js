@@ -4,10 +4,7 @@ const mongoose = require("mongoose");
 
 const connectToDatabase = async () => {
   try {
-    const MONGODB_URI =
-      process.env.MONGODB_URI ||
-      `mongodb://localhost:27017/${process.env.DB_NAME}`;
-
+    const MONGODB_URI = `mongodb://127.0.0.1:27017/NOSQL-social-network-api`;
     const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,

@@ -1,88 +1,87 @@
-const connection = require("../../src/config/connection");
-const User = require("../..//src/models/User");
-const server = require("../../src/index");
-const mongoose = require("mongoose");
+const { User } = require("../models");
 
-const getAllUsers = async (req, res) => {
+const getUsers = async (req, res) => {
   try {
-    connection();
-    const users = await User.find({});
-    console.log(users);
-    return res.json({ users });
+    const data = await User.find({}).populate("thoughts").populate("friends");
+    return res.json({ success: true, data });
   } catch (error) {
-    console.log(error);
+    console.log(`[ERROR]: Failed to get users | ${error.message}`);
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to get users" });
   }
 };
 
 const getUserById = async (req, res) => {
   try {
-    connection();
-    const { id } = req.params;
-    const user = await User.findById(id);
-    console.log(user);
-    return res.json({ user });
+    const { userId } = req.params;
+    const data = await User.findById(userId)
+      .populate("thoughts")
+      .populate("friends");
+    return res.json({ success: true, data });
   } catch (error) {
-    console.log(error);
+    console.log(`[ERROR]: Failed to get user | ${error.message}`);
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to get user" });
   }
 };
 
-const createANewUser = async (req, res) => {
+const createUser = async (req, res) => {
   try {
-    connection();
-    console.log(req.body);
-
-    const { userName, email, thoughts, friends } = req.body;
-
-    const createANewUser = await User.create({
-      userName,
-      email,
-      thoughts,
-      friends,
+    const { userName, email } = req.body;
+    if (userName && email) {
+      const data = await User.create({ userName, email });
+      return res.json({ success: true, data });
+    }
+    return res.status(400).json({
+      success: false,
+      error: "Please complete the username and email",
     });
-    console.log(createANewUser);
-    return res.send({ createANewUser });
   } catch (error) {
-    console.log(error);
+    console.log(`[ERROR]: Failed to create new user | ${error.message}`);
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to create new user" });
   }
 };
 
-const updateUser = async (req, res) => {
+const updateUserById = async (req, res) => {
   try {
-    connection();
-    console.log(req.body);
-
-    const { userName, email, thoughts, friends } = req.body;
-
-    const updateUser = await User.findOneAndUpdate({
-      userName,
-      email,
-      thoughts,
-      friends,
-    });
-    console.log(updateUser);
-    return res.send({ updateUser });
+    const { userId } = req.params;
+    const data = await User.findByIdAndUpdate(
+      userId,
+      {
+        ...req.body,
+      },
+      { new: true }
+    );
+    return res.json({ success: true, data });
   } catch (error) {
-    console.log(error);
+    console.log(`[ERROR]: Failed to update existent user | ${error.message}`);
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to update existent user" });
   }
 };
 
 const deleteUserById = async (req, res) => {
   try {
-    connection();
-    const { id } = req.params;
-
-    const deleteAUser = await User.deleteOne({ id });
-    console.log(deleteAUser);
-    return res.send({ deleteAUser });
+    const { userId } = req.params;
+    const data = await User.findByIdAndDelete(userId);
+    return res.json({ success: true, data });
   } catch (error) {
-    console.log(error);
+    console.log(`[ERROR]: Failed to delete user | ${error.message}`);
+    return res
+      .status(500)
+      .json({ success: false, error: "Please provide correct ID" });
   }
 };
 
 module.exports = {
-  getAllUsers,
+  getUsers,
   getUserById,
-  createANewUser,
-  updateUser,
+  createUser,
+  updateUserById,
   deleteUserById,
 };

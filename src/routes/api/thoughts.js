@@ -1,23 +1,22 @@
 const { Router } = require("express");
 
-const reactions = require("./reaction.js");
-
 const {
-  getAllThoughts,
+  getThoughts,
   getThoughtById,
-  createNewThought,
-  updateThought,
-  deleteThought,
+  createThought,
+  updateThoughtById,
+  deleteThoughtById,
 } = require("../../controllers/thoughts");
+const reactions = require("./reaction");
 
 const router = Router();
 
-router.get("/", getAllThoughts);
-router.get("/:id", getThoughtById);
-router.post("/", createNewThought);
-router.put("/:id", updateThought);
-router.delete("/:id", deleteThought);
+router.get("/", getThoughts);
+router.get("/:thoughtId", getThoughtById);
+router.post("/", createThought);
+router.put("/:thoughtId", updateThoughtById);
+router.delete("/:thoughtId", deleteThoughtById);
 
-router.use("/reactions", reactions);
+router.use("/:thoughtId/reactions", reactions);
 
 module.exports = router;

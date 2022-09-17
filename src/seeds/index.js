@@ -1,54 +1,60 @@
-require("dotenv").config();
-const { mongoose } = require("mongoose");
-const { Thought } = require("../../src/models/Thought");
-const { User } = require("../../src/models/User");
-const thought = require("./thoughtdata.json");
-const user = require("./userdata.json");
+const mongoose = require("mongoose");
 
-const thoughtsSeed = async () => {
-  await Thought.deleteMany();
-  const promises = thought.map((thought) => Thought.create(thought));
-  await Promise.all(promises);
-  console.log("Successfully seeded thoughts");
-};
+const { User, Thought } = require("../../src/models");
 
-const userSeed = async () => {
-  await User.deleteMany();
-  const thoughtsFromDB = await Thought.find();
-  const promises = user.map(async (user) => {
-    const chooseRandomIndex = Math.floor(Math.random() * thoughtsFromDB.length);
-    user.thoughts.push(thoughtsFromDB[chooseRandomIndex]._id);
-    return User.create(user);
-  });
-
-  await Promise.all(promises);
-  console.log("Successfully seeded users");
-};
+const users = require("../");
+const thoughts = require("./data/thoughts");
 
 const init = async () => {
   try {
-    const DB_NAME = process.env.DB_NAME;
-    const MONGODB_URI =
-      process.env.MONGODB_URI || `mongodb://localhost:27017/${DB_NAME}`;
-
-    const options = {
+    await mongoose.connect("mongodb://localhost:27017/social_network_db", {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    };
+    });
 
-    await mongoose.connect(MONGODB_URI, options);
+    console.log("[INFO]: Database connection successful");
 
-    console.log("[INFO]: Successfully connected to Database");
+    await User.deleteMany({});
+    await User.insertMany(users);
 
-    await thoughtsSeed();
-    await userSeed();
+    console.log("[INFO]: Successfully seeded users");
 
-    console.log("Successfully seeded");
+    await Thought.deleteMany({});
+    await Thought.insertMany(thoughts);
+
+    console.log("[INFO]: successfully seeded thoughts");
+
+    const thoughtsFromDb = await Thought.find({});
+    const usersFromDb = await User.find({});
+
+    const promises = thoughtsFromDb.map(async (thought) => {
+      const userName = thought.userName;
+      const user = usersFromDb.find((user) => user.userName === userName);
+      user.thoughts.push(thought._id.toString());
+      await User.findByIdAndUpdate(user._id, { ...user });
+    });
+
+    const friendsPromises = usersFromDb.map(async (user) => {
+      const userId = user._id.toString();
+      const allUsers = usersFromDb.filter(
+        (currentUser) => currentUser.userName !== user.userName
+      );
+      const randomFriend =
+        allUsers[Math.floor(Math.random() * allUsers.length)];
+
+      user.friends.push(randomFriend._id);
+      await User.findByIdAndUpdate(userId, { ...user });
+    });
+
+    await Promise.all(promises);
+    await Promise.all(friendsPromises);
+
+    await mongoose.disconnect();
   } catch (error) {
-    console.log(`[ERROR]: Could not seed | ${error.message}`);
+    console.log(
+      `[INFO]: Database connection failed  - failed to seed database | ${error.message}`
+    );
   }
-
-  process.exit(0);
 };
 
 init();

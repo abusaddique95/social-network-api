@@ -1,53 +1,49 @@
-const connection = require("../../src/config/connection");
-const Reaction = require("../../src/models/Reaction");
-const server = require("../../src/index");
-const mongoose = require("mongoose");
-const Thought = require("../../src/models/Thought");
+const { Thought } = require("../models");
 
-const createReaction = async (req, res) => {
+const createReactionForThought = async (req, res) => {
   try {
-    connection();
-    // get a reaction
-    const { id } = req.params;
-    const { userName, email } = req.body;
-    // // findandUpdate reaction
-    console.log(email, userName, id);
-    // // push updated reaction into reaction
-    const newReaction = await Reaction.create({ userName, email });
+    //get thought id from req params
+    const { thoughtId } = req.params;
 
-    const reactedThought = await Thought.findByIdAndUpdate(
-      { _id: id },
+    //push new reaction inside the reactions array for that thought id
+    const data = await Thought.findByIdAndUpdate(
+      thoughtId,
       {
-        $push: {
-          reactions: newReaction._id,
-        },
+        $push: { reactions: { ...req.body } },
       },
-      {
-        new: true,
-      }
+      { new: true }
     );
+
+    return res.json({ success: true, data });
   } catch (error) {
-    console.log(error);
+    console.log(
+      `[ERROR]: Failed to create a new reaction for present thought | ${error.message}`
+    );
+
+    return res.status(500).json({
+      success: false,
+      error: "Failed to create a new reaction for present thought",
+    });
   }
 };
 
-const deleteReaction = async (req, res) => {
-  res.send("deleteAReaction");
-
+const deleteReactionByThought = async (req, res) => {
   try {
-    connection();
-    const { id } = req.params;
-    const { userName, email } = req.body;
-
-    const removeReaction = await Reaction.deleteOne({ userName, email, id });
-
-    console.log(removeReaction);
+    const { thoughtId, reactionId } = req.params;
+    const data = await Thought.findByIdAndUpdate(
+      thoughtId,
+      {
+        $pull: { reactions: { _id: reactionId } },
+      },
+      { new: true }
+    );
+    return res.json({ success: true, data });
   } catch (error) {
-    console.log(error);
+    console.log(`[ERROR]: Failed to delete reaction | ${error.message}`);
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to delete reaction" });
   }
 };
 
-module.exports = {
-  createReaction,
-  deleteReaction,
-};
+module.exports = { createReactionForThought, deleteReactionByThought };

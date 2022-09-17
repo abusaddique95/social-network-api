@@ -1,88 +1,85 @@
-const connection = require("../../src/config/connection");
-const Thought = require("../../src/models/Thought");
-const server = require("../../src/index");
-const mongoose = require("mongoose");
+const { Thought } = require("../models");
 
-const getAllThoughts = async (req, res) => {
+const getThoughts = async (req, res) => {
   try {
-    connection();
-    const thoughts = await Thought.find({});
-    console.log(thoughts);
-    return res.json({ thoughts });
+    const data = await Thought.find({});
+    return res.json({ success: true, data });
   } catch (error) {
-    console.log(error);
+    console.log(`[ERROR]: Failed to get thoughts | ${error.message}`);
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to get thoughts" });
   }
 };
 
 const getThoughtById = async (req, res) => {
   try {
-    connection();
-    const { id } = req.params;
-    const thought = await Thought.findById(id);
-    console.log(thought);
-    return res.json({ thought });
+    const { thoughtId } = req.params;
+    const data = await Thought.findById(thoughtId);
+    return res.json({ success: true, data });
   } catch (error) {
-    console.log(error);
+    console.log(`[ERROR]: Failed to get thought | ${error.message}`);
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to get thought" });
   }
 };
 
-const createNewThought = async (req, res) => {
+const createThought = async (req, res) => {
   try {
-    connection();
-    console.log(req.body);
-
-    const { thoughtText, createdAt, userName, reactions } = req.body;
-
-    const createANewThought = await Thought.create({
-      thoughtText,
-      createdAt,
-      userName,
-      reactions,
+    const { userName, thoughtText } = req.body;
+    if (userName && thoughtText) {
+      const data = await Thought.create({ userName, thoughtText });
+      return res.json({ success: true, data });
+    }
+    return res.status(400).json({
+      success: false,
+      error: "Please complete the required fields",
     });
-    console.log(createANewThought);
-    return res.send({ createANewThought });
   } catch (error) {
-    console.log(error);
+    console.log(`[ERROR]: Failed to create new thought | ${error.message}`);
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to create new thought" });
   }
 };
 
-const updateThought = async (req, res) => {
+const updateThoughtById = async (req, res) => {
   try {
-    connection();
-    console.log(req.body);
-
-    const { thoughtText, createdAt, userName, reactions } = req.body;
-
-    const updateAThought = await Thought.findOneAndUpdate({
-      thoughtText,
-      createdAt,
-      userName,
-      reactions,
-    });
-    console.log(updateAThought);
-    return res.send({ updateAThought });
+    const { thoughtId } = req.params;
+    const data = await Thought.findByIdAndUpdate(
+      thoughtId,
+      {
+        ...req.body,
+      },
+      { new: true }
+    );
+    return res.json({ success: true, data });
   } catch (error) {
-    console.log(error);
+    console.log(`[ERROR]: Failed to update thought | ${error.message}`);
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to update thought" });
   }
 };
 
-const deleteThought = async (req, res) => {
+const deleteThoughtById = async (req, res) => {
   try {
-    connection();
-    const { id } = req.params;
-
-    const deleteAThought = await Thought.deleteOne({ id });
-    console.log(deleteAThought);
-    return res.send({ deleteAThought });
+    const { thoughtId } = req.params;
+    const deletedThought = await Thought.findByIdAndDelete(thoughtId);
+    return res.json({ success: true, data: deletedThought });
   } catch (error) {
-    console.log(error);
+    console.log(`[ERROR]: Failed to delete thought | ${error.message}`);
+    return res
+      .status(500)
+      .json({ success: false, error: "Please provide correct ID" });
   }
 };
 
 module.exports = {
-  getAllThoughts,
+  getThoughts,
   getThoughtById,
-  createNewThought,
-  updateThought,
-  deleteThought,
+  createThought,
+  updateThoughtById,
+  deleteThoughtById,
 };
