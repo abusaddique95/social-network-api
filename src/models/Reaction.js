@@ -1,6 +1,5 @@
-const { Schema, Types } = require("mongoose");
-
-const { formatTime } = require("../../src/");
+const { Schema } = require("mongoose");
+const moment = require("moment");
 
 const reactionSchema = {
   reactionBody: {
@@ -8,14 +7,14 @@ const reactionSchema = {
     required: true,
     maxLength: 280,
   },
-  userName: {
+  username: {
     type: String,
     required: true,
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
-    get: formatTime,
+    required: true,
+    default: moment(),
   },
 };
 
