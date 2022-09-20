@@ -1,38 +1,51 @@
-const { User } = require("../models");
+const { User, Thought } = require("../../src/models");
 
-const createFriendForUser = async (req, res) => {
+const createFriendFromUser = async (req, res) => {
+  const { userId, friendId } = req.params;
+
   try {
-    const { userId } = req.params;
-    const data = await User.findByIdAndUpdate(
-      userId,
-      {
-        $push: { friends: req.body._id },
-      },
-      { new: true }
-    ).populate("friends");
-    return res.json({ success: true, data });
+    if (userId && friendId) {
+      await User.findOneAndUpdate(
+        { _id: userId },
+        { $addToSet: { friends: friendId } },
+        { new: true, runValidators: true }
+      );
+
+      await User.findOneAndUpdate(
+        { _id: friendId },
+        { $addToSet: { friends: userId } },
+        { new: true, runValidators: true }
+      );
+      return res.json({ success: true });
+    } else res.status(500).json({ success: false });
   } catch (error) {
-    console.log(`[ERROR]: Failed to create new friend | ${error.message}`);
-    return res
-      .status(500)
-      .json({ success: false, error: "Failed to create new friend" });
+    console.log(`[ERROR]: Could not create new friend | ${error.message}`);
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
-const deleteFriendByUser = async (req, res) => {
-  try {
-    const { userId, friendId } = req.params;
+const removeFriendFromUser = async (req, res) => {
+  const { userId, friendId } = req.params;
 
-    const user = await User.findByIdAndUpdate(userId, {
-      $pull: { friends: friendId },
-    });
-    return res.json({ success: true, data: user });
+  try {
+    if (userId && friendId) {
+      await User.findOneAndUpdate(
+        { _id: userId },
+        { $pull: { friends: friendId } },
+        { new: true, runValidators: true }
+      );
+
+      await User.findOneAndUpdate(
+        { _id: friendId },
+        { $pull: { friends: userId } },
+        { new: true, runValidators: true }
+      );
+      return res.json({ success: true });
+    } else res.status(500).json({ success: false });
   } catch (error) {
-    console.log(`[ERROR]: Failed to delete friend | ${error.message}`);
-    return res
-      .status(500)
-      .json({ success: false, error: "Failed to delete friend" });
+    console.log(`[ERROR]: Could not add remove friend | ${error.message}`);
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
-module.exports = { createFriendForUser, deleteFriendByUser };
+module.exports = { createFriendFromUser, removeFriendFromUser };

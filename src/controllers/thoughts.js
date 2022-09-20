@@ -1,85 +1,81 @@
-const { Thought } = require("../models");
+const { User, Thought } = require("../../src/models");
 
-const getThoughts = async (req, res) => {
+const getAllThoughts = async (req, res) => {
   try {
-    const data = await Thought.find({});
-    return res.json({ success: true, data });
+    const thought = await Thought.find({});
+
+    return res.json({ data: thought });
   } catch (error) {
-    console.log(`[ERROR]: Failed to get thoughts | ${error.message}`);
-    return res
-      .status(500)
-      .json({ success: false, error: "Failed to get thoughts" });
+    console.log(`[Error]: Could not get thoughts | ${error.message}`);
   }
 };
 
-const getThoughtById = async (req, res) => {
+const getThoughtsById = async (req, res) => {
   try {
-    const { thoughtId } = req.params;
-    const data = await Thought.findById(thoughtId);
-    return res.json({ success: true, data });
+    const { id } = req.params;
+
+    const thought = await Thought.findById(id);
+
+    if (!thought) {
+      return res.status(404).json({ success: false });
+    }
+
+    return res.json({ data: thought });
   } catch (error) {
-    console.log(`[ERROR]: Failed to get thought | ${error.message}`);
-    return res
-      .status(500)
-      .json({ success: false, error: "Failed to get thought" });
+    console.log(`[Error]: could not get thought | ${error.message}`);
   }
 };
 
 const createThought = async (req, res) => {
   try {
-    const { userName, thoughtText } = req.body;
-    if (userName && thoughtText) {
-      const data = await Thought.create({ userName, thoughtText });
-      return res.json({ success: true, data });
+    const { username, thoughtText } = req.body;
+
+    if (username && thoughtText) {
+      await Thought.create({ username, thoughtText });
+      return res.json({ success: true });
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: `Please enter valid username and thought`,
+      });
     }
-    return res.status(400).json({
-      success: false,
-      error: "Please complete the required fields",
-    });
   } catch (error) {
-    console.log(`[ERROR]: Failed to create new thought | ${error.message}`);
-    return res
-      .status(500)
-      .json({ success: false, error: "Failed to create new thought" });
+    console.log(`[ERROR]: could not create new thought | ${error.message}`);
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
-const updateThoughtById = async (req, res) => {
+const updateThought = async (req, res) => {
   try {
-    const { thoughtId } = req.params;
-    const data = await Thought.findByIdAndUpdate(
-      thoughtId,
-      {
-        ...req.body,
-      },
-      { new: true }
-    );
-    return res.json({ success: true, data });
+    const { id } = req.params;
+    const { username, thoughtText } = req.body;
+    if (username || thoughtText) {
+      await Thought.findByIdAndUpdate(id, {
+        username,
+        thoughtText,
+      });
+      return res.json({ success: true });
+    } else res.status(500).json({ success: false });
   } catch (error) {
-    console.log(`[ERROR]: Failed to update thought | ${error.message}`);
-    return res
-      .status(500)
-      .json({ success: false, error: "Failed to update thought" });
+    console.log(`[ERROR]: could not update thought | ${error.message}`);
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
-const deleteThoughtById = async (req, res) => {
+const deleteThought = async (req, res) => {
   try {
-    const { thoughtId } = req.params;
-    const deletedThought = await Thought.findByIdAndDelete(thoughtId);
-    return res.json({ success: true, data: deletedThought });
+    const { id } = req.params;
+    await Thought.findByIdAndDelete(id);
+    return res.json({ success: true });
   } catch (error) {
-    console.log(`[ERROR]: Failed to delete thought | ${error.message}`);
-    return res
-      .status(500)
-      .json({ success: false, error: "Please provide correct ID" });
+    console.log(`[Error]: Could not delete thought | ${error.message}`);
   }
 };
 
 module.exports = {
-  getThoughts,
-  getThoughtById,
+  getAllThoughts,
+  getThoughtsById,
   createThought,
-  updateThoughtById,
-  deleteThoughtById,
+  updateThought,
+  deleteThought,
 };

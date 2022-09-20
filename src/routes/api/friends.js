@@ -1,13 +1,12 @@
 const { Router } = require("express");
-
+const router = Router();
 const {
-  createFriendForUser,
-  deleteFriendByUser,
+  createFriendFromUser,
+  removeFriendFromUser,
 } = require("../../controllers/friends");
 
-const router = Router({ mergeParams: true });
+router.post("/friends", createFriendFromUser);
 
-router.post("/", createFriendForUser);
-router.delete("/:friendId", deleteFriendByUser);
+router.delete("/friends/:friendId", removeFriendFromUser);
 
 module.exports = router;

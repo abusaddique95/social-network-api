@@ -1,22 +1,31 @@
 const { Router } = require("express");
+const router = Router();
+const friends = require("./friends.js");
 
 const {
-  getThoughts,
-  getThoughtById,
-  createThought,
-  updateThoughtById,
-  deleteThoughtById,
-} = require("../../controllers/thoughts");
-const reactions = require("./reaction");
+  getAllUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+} = require("../../controllers/users");
 
-const router = Router();
+//GET /
+router.get("/", getAllUsers);
 
-router.get("/", getThoughts);
-router.get("/:thoughtId", getThoughtById);
-router.post("/", createThought);
-router.put("/:thoughtId", updateThoughtById);
-router.delete("/:thoughtId", deleteThoughtById);
+//GET /:id
+router.get("/:id", getUserById);
 
-router.use("/:thoughtId/reactions", reactions);
+//POST /
+router.post("/", createUser);
+
+//PUT /:id
+router.put("/:id", updateUser);
+
+//DEL /:id
+router.delete("/:id", deleteUser);
+
+//USE /:userID
+router.use("/:userId", friends);
 
 module.exports = router;
